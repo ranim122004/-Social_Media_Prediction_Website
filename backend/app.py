@@ -7,6 +7,8 @@ import os
 from datetime import datetime
 import traceback
 from sklearn.preprocessing import StandardScaler
+import joblib
+
 
 app = Flask(__name__)
 CORS(app)
@@ -100,7 +102,7 @@ def load_models():
     global models
     models_dir = 'models'
     
-    # Try to load models if they exist
+    # Map keys to filenames
     model_files = {
         'strategy_kmeans': 'strategy_kmeans_k2.pkl',
         'tiktok_autoencoder': 'tiktok_audience_autoencoder.pkl',
@@ -113,8 +115,8 @@ def load_models():
         filepath = os.path.join(models_dir, filename)
         if os.path.exists(filepath):
             try:
-                with open(filepath, 'rb') as f:
-                    models[key] = pickle.load(f)
+                # joblib.load can handle both joblib and many plain pickle files
+                models[key] = joblib.load(filepath)
                 print(f"Loaded model: {key}")
             except Exception as e:
                 print(f"Error loading {key}: {str(e)}")
@@ -122,6 +124,7 @@ def load_models():
             print(f"Model not found: {filepath}")
     
     print(f"Models loaded: {list(models.keys())}")
+
 
 # Initialize on startup
 load_data()
